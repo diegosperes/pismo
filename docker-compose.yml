@@ -1,0 +1,68 @@
+version: '3.9'
+
+x-app-base: &app-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+    target: builder
+  volumes:
+    - .:/app
+  environment:
+    - SERVER_PORT=${SERVER_PORT}
+    - SERVER_LOG_LEVEL_NAME=${SERVER_LOG_LEVEL_NAME}
+    - DATABASE_HOST=${DATABASE_HOST}
+    - DATABASE_NAME=${DATABASE_NAME}
+    - DATABASE_SSL_MODE=${DATABASE_SSL_MODE}
+    - DATABASE_USER=${DATABASE_USER}
+    - DATABASE_PASS=${DATABASE_PASS}
+
+services:
+  migrations:
+    <<: *app-base
+    command: go run ./app/migration/main.go
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    <<: *app-base
+    restart: always
+    command: go run main.go
+    ports:
+      - "8080:8080"
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+
+  tests:
+    profiles:
+      - donotstart
+    <<: *app-base
+    command: go test ./...
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:15.4-alpine3.18
+    environment:
+      POSTGRES_MULTIPLE_DATABASES: pismo,test_pismo
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: peres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres-entrypoint.sh:/docker-entrypoint-initdb.d/postgres-entrypoint.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
