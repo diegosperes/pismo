@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/google/uuid"
 
@@ -16,7 +15,6 @@ func CreateAccount(ctx context.Context, a *model.Account) error {
 
 func GetAccount(ctx context.Context, id uuid.UUID) (*model.Account, error) {
 	a := &model.Account{}
-	slog.Info("GetAccount", "id", id)
 	db := util.GetDatabase().WithContext(ctx).First(a, id)
 	return a, db.Error
 }
