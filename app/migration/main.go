@@ -9,6 +9,7 @@ import (
 
 func main() {
 	util.SetupApp()
+
 	migrationErr := util.GetDatabase().AutoMigrate(&model.Account{}, &model.Transaction{})
 
 	if migrationErr != nil {

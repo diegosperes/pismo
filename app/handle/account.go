@@ -23,7 +23,7 @@ func CreateAccount(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 		return
 	}
 
-	accountErr := domain.CreateAccount(account)
+	accountErr := domain.CreateAccount(r.Context(), account)
 
 	if accountErr != nil {
 		util.WriteJsonError(w, http.StatusBadRequest, accountErr.Error())
@@ -41,7 +41,7 @@ func GetAccount(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	account, accountErr := domain.GetAccount(accountId)
+	account, accountErr := domain.GetAccount(r.Context(), accountId)
 
 	if errors.Is(accountErr, gorm.ErrRecordNotFound) {
 		util.WriteJsonError(w, http.StatusNotFound)

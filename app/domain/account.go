@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/google/uuid"
@@ -9,13 +10,13 @@ import (
 	"github.com/diegosperes/pismo/app/util"
 )
 
-func CreateAccount(a *model.Account) error {
-	return util.GetDatabase().Create(a).Error
+func CreateAccount(ctx context.Context, a *model.Account) error {
+	return util.GetDatabase().WithContext(ctx).Create(a).Error
 }
 
-func GetAccount(id uuid.UUID) (*model.Account, error) {
+func GetAccount(ctx context.Context, id uuid.UUID) (*model.Account, error) {
 	a := &model.Account{}
 	slog.Info("GetAccount", "id", id)
-	db := util.GetDatabase().First(a, id)
+	db := util.GetDatabase().WithContext(ctx).First(a, id)
 	return a, db.Error
 }
