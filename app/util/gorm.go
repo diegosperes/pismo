@@ -12,8 +12,6 @@ import (
 	gormL "gorm.io/gorm/logger"
 )
 
-var database *gorm.DB
-
 func getGormLogLevel(levelName string) gormL.LogLevel {
 	switch strings.ToUpper(levelName) {
 	case "ERROR":
@@ -74,11 +72,7 @@ func (l gormLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql s
 	l.logger.Trace(ctx, begin, fc, err)
 }
 
-func SetupDatabaseConnection(dbSettings DatabaseSettings, logLevelName string) error {
-	if database != nil {
-		return nil
-	}
-
+func SetupDatabaseConnection(dbSettings DatabaseSettings, logLevelName string) (*gorm.DB, error) {
 	if len(dbSettings.LogLevelName) > 0 {
 		logLevelName = dbSettings.LogLevelName
 	}
@@ -101,13 +95,5 @@ func SetupDatabaseConnection(dbSettings DatabaseSettings, logLevelName string) e
 		},
 	)
 
-	if err == nil {
-		database = db
-	}
-
-	return err
-}
-
-func GetDatabase() *gorm.DB {
-	return database
+	return db, err
 }

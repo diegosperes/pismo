@@ -24,13 +24,8 @@ type AppSettings struct {
 	Database DatabaseSettings
 }
 
-var settings *AppSettings
-
-func LoadSettings() error {
-	settings = &AppSettings{}
-	return env.Parse(settings)
-}
-
-func GetSettings() AppSettings {
-	return *settings
+func LoadSettings() (*AppSettings, error) {
+	settings := &AppSettings{}
+	err := env.Parse(settings)
+	return settings, err
 }

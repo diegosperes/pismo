@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 
+	middl "github.com/diegosperes/pismo/app/middleware"
 	"github.com/diegosperes/pismo/app/model"
 	"gorm.io/gorm"
 )
-
-type TransactionDatabaseContextKey struct{}
 
 var (
 	ErrTransactionAmountNegative = errors.New("transaction amount must be negative for the given operation type")
@@ -24,6 +23,6 @@ func CreateTransaction(ctx context.Context, t *model.Transaction) error {
 		return ErrTransactionAmountNegative
 	}
 
-	ctxDb := ctx.Value(TransactionDatabaseContextKey{}).(*gorm.DB)
-	return ctxDb.WithContext(ctx).Create(t).Error
+	db := ctx.Value(middl.DatabaseContextKey{}).(gorm.DB)
+	return db.WithContext(ctx).Create(t).Error
 }

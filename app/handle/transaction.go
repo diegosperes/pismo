@@ -1,7 +1,6 @@
 package handle
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 
@@ -20,9 +19,7 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		return
 	}
 
-	ctx := r.Context()
-	ctx = context.WithValue(ctx, domain.TransactionDatabaseContextKey{}, util.GetDatabase())
-	transactionErr := domain.CreateTransaction(ctx, transaction)
+	transactionErr := domain.CreateTransaction(r.Context(), transaction)
 
 	if transactionErr != nil {
 		util.WriteJsonError(w, http.StatusBadRequest, transactionErr.Error())

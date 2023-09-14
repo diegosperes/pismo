@@ -1,7 +1,6 @@
 package handle
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -24,9 +23,7 @@ func CreateAccount(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 		return
 	}
 
-	ctx := r.Context()
-	ctx = context.WithValue(ctx, domain.AccountDatabaseContextKey{}, util.GetDatabase())
-	accountErr := domain.CreateAccount(ctx, account)
+	accountErr := domain.CreateAccount(r.Context(), account)
 
 	if accountErr != nil {
 		util.WriteJsonError(w, http.StatusBadRequest, accountErr.Error())
@@ -44,9 +41,7 @@ func GetAccount(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	ctx := r.Context()
-	ctx = context.WithValue(ctx, domain.AccountDatabaseContextKey{}, util.GetDatabase())
-	account, accountErr := domain.GetAccount(ctx, accountId)
+	account, accountErr := domain.GetAccount(r.Context(), accountId)
 
 	if errors.Is(accountErr, gorm.ErrRecordNotFound) {
 		util.WriteJsonError(w, http.StatusNotFound)

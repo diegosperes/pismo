@@ -25,12 +25,13 @@ func newTestAccount() *model.Account {
 type AccountTestSuite struct {
 	suite.Suite
 
-	router http.Handler
+	dependencies *util.AppDependencies
+	router       http.Handler
 }
 
 func (s *AccountTestSuite) SetupSuite() {
-	util.SetupApp()
-	s.router = GetConfiguredRouter()
+	s.dependencies = util.SetupApp()
+	s.router = GetConfiguredRouter(s.dependencies)
 }
 
 func (s *AccountTestSuite) TestCreateAccount() {
@@ -65,7 +66,7 @@ func (s *AccountTestSuite) TestCreateInvalidAccount() {
 
 func (s *AccountTestSuite) TestGetAccount() {
 	createdAccount := newTestAccount()
-	util.GetDatabase().Create(createdAccount)
+	s.dependencies.Database.Create(createdAccount)
 
 	requestPath := fmt.Sprintf("/accounts/%s", createdAccount.ID.String())
 	request, _ := http.NewRequest(http.MethodGet, requestPath, nil)

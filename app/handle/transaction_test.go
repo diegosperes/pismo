@@ -8,14 +8,15 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
+	"gorm.io/gorm"
 
 	"github.com/diegosperes/pismo/app/model"
 	"github.com/diegosperes/pismo/app/util"
 )
 
-func newTestTransaction() *model.Transaction {
+func newTestTransaction(db gorm.DB) *model.Transaction {
 	account := newTestAccount()
-	util.GetDatabase().Create(account)
+	db.Create(account)
 
 	return &model.Transaction{
 		AccountId:       account.ID,
@@ -27,16 +28,17 @@ func newTestTransaction() *model.Transaction {
 type TransactionTestSuite struct {
 	suite.Suite
 
-	router http.Handler
+	dependencies *util.AppDependencies
+	router       http.Handler
 }
 
 func (s *TransactionTestSuite) SetupSuite() {
-	util.SetupApp()
-	s.router = GetConfiguredRouter()
+	s.dependencies = util.SetupApp()
+	s.router = GetConfiguredRouter(s.dependencies)
 }
 
 func (s *TransactionTestSuite) TestCreateTransaction() {
-	createdTransaction := newTestTransaction()
+	createdTransaction := newTestTransaction(s.dependencies.Database)
 	jsonBody, _ := json.Marshal(createdTransaction)
 
 	requestBody := bytes.NewReader(jsonBody)
@@ -56,7 +58,7 @@ func (s *TransactionTestSuite) TestCreateTransaction() {
 }
 
 func (s *TransactionTestSuite) TestCreateInvalidTransaction() {
-	createdTransaction := newTestTransaction()
+	createdTransaction := newTestTransaction(s.dependencies.Database)
 	createdTransaction.OperationTypeId = model.OperationTypeLumpSum
 	jsonBody, _ := json.Marshal(createdTransaction)
 

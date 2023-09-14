@@ -5,20 +5,25 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	m "github.com/diegosperes/pismo/app/middleware"
+	middl "github.com/diegosperes/pismo/app/middleware"
+	"github.com/diegosperes/pismo/app/util"
 )
 
-func GetConfiguredRouter() http.Handler {
-	middl := m.NewMiddlewareManager(m.LogRequestMiddleware)
+func GetConfiguredRouter(deps *util.AppDependencies) http.Handler {
+	m := middl.NewMiddlewareManager(
+		middl.LogRequestMiddleware,
+		middl.SettingsMiddleware(deps.Settings),
+		middl.DatabaseMiddleware(deps.Database),
+	)
 
 	router := httprouter.New()
 	router.RedirectTrailingSlash = true
-	router.NotFound = middl.WrapHTTPHandler(HandlerStatusCode(http.StatusNotFound))
-	router.MethodNotAllowed = middl.WrapHTTPHandler(HandlerStatusCode(http.StatusMethodNotAllowed))
+	router.NotFound = m.WrapHTTPHandler(HandlerStatusCode(http.StatusNotFound))
+	router.MethodNotAllowed = m.WrapHTTPHandler(HandlerStatusCode(http.StatusMethodNotAllowed))
 
-	router.POST("/accounts/", middl.Use(CreateAccount))
-	router.GET("/accounts/:accountId", middl.Use(GetAccount))
-	router.POST("/transactions/", middl.Use(CreateTransaction))
+	router.POST("/accounts/", m.Use(CreateAccount))
+	router.GET("/accounts/:accountId", m.Use(GetAccount))
+	router.POST("/transactions/", m.Use(CreateTransaction))
 
 	return router
 }

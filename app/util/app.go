@@ -2,21 +2,36 @@ package util
 
 import (
 	"log"
+
+	"gorm.io/gorm"
 )
 
-func SetupApp() {
-	if settingsErr := LoadSettings(); settingsErr != nil {
+type AppDependencies struct {
+	Settings AppSettings
+	Database gorm.DB
+}
+
+func SetupApp() *AppDependencies {
+	settings, settingsErr := LoadSettings()
+
+	if settingsErr != nil {
 		log.Fatal(settingsErr)
 	}
 
-	settings := GetSettings()
 	logLevelName := settings.Server.LogLevelName
 
 	if logErr := ConfigureDefaultLogger(logLevelName); logErr != nil {
 		log.Fatal(logErr)
 	}
 
-	if dbErr := SetupDatabaseConnection(settings.Database, logLevelName); dbErr != nil {
+	database, dbErr := SetupDatabaseConnection(settings.Database, logLevelName)
+
+	if dbErr != nil {
 		log.Fatal(dbErr)
+	}
+
+	return &AppDependencies{
+		Settings: *settings,
+		Database: *database,
 	}
 }

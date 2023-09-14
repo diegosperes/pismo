@@ -10,11 +10,11 @@ import (
 )
 
 func main() {
-	util.SetupApp()
+	deps := util.SetupApp()
+	port := deps.Settings.Server.Port
 
-	settings := util.GetSettings()
-	slog.Info("Starting application", "port", settings.Server.Port)
-	serverErr := http.ListenAndServe(settings.Server.Port, handle.GetConfiguredRouter())
+	slog.Info("Starting application", "port", port)
+	serverErr := http.ListenAndServe(port, handle.GetConfiguredRouter(deps))
 
 	if serverErr != nil {
 		log.Fatal(serverErr)

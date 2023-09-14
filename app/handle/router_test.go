@@ -12,7 +12,7 @@ import (
 )
 
 func TestServeNotFound(t *testing.T) {
-	router := GetConfiguredRouter()
+	router := GetConfiguredRouter(&util.AppDependencies{})
 
 	request, _ := http.NewRequest(http.MethodGet, "/not/found/", nil)
 	response := httptest.NewRecorder()
@@ -28,7 +28,7 @@ func TestServeNotFound(t *testing.T) {
 }
 
 func TestServeMethodNotAllowed(t *testing.T) {
-	router := GetConfiguredRouter()
+	router := GetConfiguredRouter(&util.AppDependencies{})
 
 	request, _ := http.NewRequest("UNKNOW", "/accounts/", nil)
 	response := httptest.NewRecorder()

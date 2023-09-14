@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	util.SetupApp()
+	deps := util.SetupApp()
 
-	migrationErr := util.GetDatabase().AutoMigrate(&model.Account{}, &model.Transaction{})
+	migrationErr := deps.Database.AutoMigrate(&model.Account{}, &model.Transaction{})
 
 	if migrationErr != nil {
 		log.Fatal("An error ocurred on migration; ", migrationErr.Error())
