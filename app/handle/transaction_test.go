@@ -5,10 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/diegosperes/pismo/app/model"
 	"github.com/diegosperes/pismo/app/util"
@@ -25,7 +24,15 @@ func newTestTransaction() *model.Transaction {
 	}
 }
 
-func TestCreateTransaction(t *testing.T) {
+type TransactionTestSuite struct {
+	suite.Suite
+}
+
+func (s *TransactionTestSuite) SetupSuite() {
+	util.SetupApp()
+}
+
+func (s *TransactionTestSuite) TestCreateTransaction() {
 	router := GetConfiguredRouter()
 
 	createdTransaction := newTestTransaction()
@@ -40,9 +47,28 @@ func TestCreateTransaction(t *testing.T) {
 	responseData := &model.Transaction{}
 	json.Unmarshal(response.Body.Bytes(), responseData)
 
-	assert.Equal(t, http.StatusCreated, response.Code)
-	assert.NotEqual(t, uuid.Nil, responseData.ID)
-	assert.Equal(t, createdTransaction.AccountId, responseData.AccountId)
-	assert.Equal(t, createdTransaction.OperationTypeId, responseData.OperationTypeId)
-	assert.Equal(t, createdTransaction.Amount, responseData.Amount)
+	s.Equal(http.StatusCreated, response.Code)
+	s.NotEqual(uuid.Nil, responseData.ID)
+	s.Equal(createdTransaction.AccountId, responseData.AccountId)
+	s.Equal(createdTransaction.OperationTypeId, responseData.OperationTypeId)
+	s.Equal(createdTransaction.Amount, responseData.Amount)
+}
+
+func (s *TransactionTestSuite) TestCreateInvalidTransaction() {
+	router := GetConfiguredRouter()
+
+	createdTransaction := newTestTransaction()
+	createdTransaction.OperationTypeId = model.OperationTypeLumpSum
+	jsonBody, _ := json.Marshal(createdTransaction)
+
+	requestBody := bytes.NewReader(jsonBody)
+	request, _ := http.NewRequest(http.MethodPost, "/transactions/", requestBody)
+	response := httptest.NewRecorder()
+
+	router.ServeHTTP(response, request)
+
+	responseData := &model.Transaction{}
+	json.Unmarshal(response.Body.Bytes(), responseData)
+
+	s.Equal(http.StatusBadRequest, response.Code)
 }

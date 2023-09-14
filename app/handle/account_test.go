@@ -8,18 +8,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
-	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/diegosperes/pismo/app/model"
 	"github.com/diegosperes/pismo/app/util"
 )
-
-func init() {
-	util.SetupApp()
-}
 
 func newTestAccount() *model.Account {
 	return &model.Account{
@@ -27,7 +22,15 @@ func newTestAccount() *model.Account {
 	}
 }
 
-func TestCreateAccount(t *testing.T) {
+type AccountTestSuite struct {
+	suite.Suite
+}
+
+func (s *AccountTestSuite) SetupSuite() {
+	util.SetupApp()
+}
+
+func (s *AccountTestSuite) TestCreateAccount() {
 	router := GetConfiguredRouter()
 
 	createdAccount := newTestAccount()
@@ -42,11 +45,11 @@ func TestCreateAccount(t *testing.T) {
 	responseData := &model.Account{}
 	json.Unmarshal(response.Body.Bytes(), responseData)
 
-	assert.Equal(t, http.StatusCreated, response.Code)
-	assert.NotEqual(t, uuid.Nil, responseData.ID)
+	s.Equal(http.StatusCreated, response.Code)
+	s.NotEqual(uuid.Nil, responseData.ID)
 }
 
-func TestCreateInvalidAccount(t *testing.T) {
+func (s *AccountTestSuite) TestCreateInvalidAccount() {
 	router := GetConfiguredRouter()
 
 	createdAccount := &model.Account{}
@@ -61,10 +64,10 @@ func TestCreateInvalidAccount(t *testing.T) {
 	responseData := &model.Account{}
 	json.Unmarshal(response.Body.Bytes(), responseData)
 
-	assert.Equal(t, http.StatusBadRequest, response.Code)
+	s.Equal(http.StatusBadRequest, response.Code)
 }
 
-func TestGetAccount(t *testing.T) {
+func (s *AccountTestSuite) TestGetAccount() {
 	router := GetConfiguredRouter()
 
 	createdAccount := newTestAccount()
@@ -79,12 +82,12 @@ func TestGetAccount(t *testing.T) {
 	responseData := &model.Account{}
 	json.Unmarshal(response.Body.Bytes(), responseData)
 
-	assert.Equal(t, http.StatusOK, response.Code)
-	assert.Equal(t, createdAccount.ID, responseData.ID)
-	assert.Equal(t, createdAccount.DocumentNumber, responseData.DocumentNumber)
+	s.Equal(http.StatusOK, response.Code)
+	s.Equal(createdAccount.ID, responseData.ID)
+	s.Equal(createdAccount.DocumentNumber, responseData.DocumentNumber)
 }
 
-func TestGetNonExistingAccount(t *testing.T) {
+func (s *AccountTestSuite) TestGetNonExistingAccount() {
 	router := GetConfiguredRouter()
 
 	requestPath := fmt.Sprintf("/accounts/%s", uuid.New().String())
@@ -96,5 +99,5 @@ func TestGetNonExistingAccount(t *testing.T) {
 	responseData := &model.Account{}
 	json.Unmarshal(response.Body.Bytes(), responseData)
 
-	assert.Equal(t, http.StatusNotFound, response.Code)
+	s.Equal(http.StatusNotFound, response.Code)
 }
