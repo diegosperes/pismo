@@ -28,6 +28,6 @@ func CreateAccount(ctx context.Context, a *model.Account) error {
 func GetAccount(ctx context.Context, id uuid.UUID) (*model.Account, error) {
 	a := &model.Account{}
 	ctxDb := ctx.Value(AccountDatabaseContextKey{}).(*gorm.DB)
-	db := ctxDb.WithContext(ctx).First(a, id)
-	return a, db.Error
+	resultDb := ctxDb.WithContext(ctx).First(a, id)
+	return a, resultDb.Error
 }
