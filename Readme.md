@@ -5,7 +5,7 @@
 The services and their dependencies run within containers. To start the service, use the following command:
 
 ```console
-$ docker-compose up
+$ docker-compose --env-file ./env/local.env up
 ```
 
 ### Routes
