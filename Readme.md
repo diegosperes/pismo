@@ -34,7 +34,7 @@ $ curl -XPOST -L "localhost:8080/transactions" -H "Content-Type: application/jso
 This project includes various types of tests, including acceptance tests that simulate the full cycle of a configured route. These tests will use an isolated database called test_pismo. To run the tests, use the following command:
 
 ```console
-$ docker-compose --env-file ./env/test.env run tests
+$ docker-compose --env-file ./env/test.env run --rm tests
 ```
 
 ### Migrations
