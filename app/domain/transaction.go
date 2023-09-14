@@ -8,5 +8,5 @@ import (
 )
 
 func CreateTransaction(ctx context.Context, t *model.Transaction) error {
-	return util.GetDatabase().Create(t).Error
+	return util.GetDatabase().WithContext(ctx).Create(t).Error
 }
