@@ -19,10 +19,10 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		return
 	}
 
-	accountErr := domain.CreateTransaction(r.Context(), transaction)
+	transactionErr := domain.CreateTransaction(r.Context(), transaction)
 
-	if accountErr != nil {
-		util.WriteJsonError(w, http.StatusBadRequest, accountErr.Error())
+	if transactionErr != nil {
+		util.WriteJsonError(w, http.StatusBadRequest, transactionErr.Error())
 		return
 	}
 
