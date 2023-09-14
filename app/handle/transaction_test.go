@@ -26,15 +26,16 @@ func newTestTransaction() *model.Transaction {
 
 type TransactionTestSuite struct {
 	suite.Suite
+
+	router http.Handler
 }
 
 func (s *TransactionTestSuite) SetupSuite() {
 	util.SetupApp()
+	s.router = GetConfiguredRouter()
 }
 
 func (s *TransactionTestSuite) TestCreateTransaction() {
-	router := GetConfiguredRouter()
-
 	createdTransaction := newTestTransaction()
 	jsonBody, _ := json.Marshal(createdTransaction)
 
@@ -42,7 +43,7 @@ func (s *TransactionTestSuite) TestCreateTransaction() {
 	request, _ := http.NewRequest(http.MethodPost, "/transactions/", requestBody)
 	response := httptest.NewRecorder()
 
-	router.ServeHTTP(response, request)
+	s.router.ServeHTTP(response, request)
 
 	responseData := &model.Transaction{}
 	json.Unmarshal(response.Body.Bytes(), responseData)
@@ -55,8 +56,6 @@ func (s *TransactionTestSuite) TestCreateTransaction() {
 }
 
 func (s *TransactionTestSuite) TestCreateInvalidTransaction() {
-	router := GetConfiguredRouter()
-
 	createdTransaction := newTestTransaction()
 	createdTransaction.OperationTypeId = model.OperationTypeLumpSum
 	jsonBody, _ := json.Marshal(createdTransaction)
@@ -65,7 +64,7 @@ func (s *TransactionTestSuite) TestCreateInvalidTransaction() {
 	request, _ := http.NewRequest(http.MethodPost, "/transactions/", requestBody)
 	response := httptest.NewRecorder()
 
-	router.ServeHTTP(response, request)
+	s.router.ServeHTTP(response, request)
 
 	s.Equal(http.StatusBadRequest, response.Code)
 }

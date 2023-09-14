@@ -24,15 +24,16 @@ func newTestAccount() *model.Account {
 
 type AccountTestSuite struct {
 	suite.Suite
+
+	router http.Handler
 }
 
 func (s *AccountTestSuite) SetupSuite() {
 	util.SetupApp()
+	s.router = GetConfiguredRouter()
 }
 
 func (s *AccountTestSuite) TestCreateAccount() {
-	router := GetConfiguredRouter()
-
 	createdAccount := newTestAccount()
 	jsonBody, _ := json.Marshal(createdAccount)
 
@@ -40,7 +41,7 @@ func (s *AccountTestSuite) TestCreateAccount() {
 	request, _ := http.NewRequest(http.MethodPost, "/accounts/", requestBody)
 	response := httptest.NewRecorder()
 
-	router.ServeHTTP(response, request)
+	s.router.ServeHTTP(response, request)
 
 	responseData := &model.Account{}
 	json.Unmarshal(response.Body.Bytes(), responseData)
@@ -50,8 +51,6 @@ func (s *AccountTestSuite) TestCreateAccount() {
 }
 
 func (s *AccountTestSuite) TestCreateInvalidAccount() {
-	router := GetConfiguredRouter()
-
 	createdAccount := &model.Account{}
 	jsonBody, _ := json.Marshal(createdAccount)
 
@@ -59,14 +58,12 @@ func (s *AccountTestSuite) TestCreateInvalidAccount() {
 	request, _ := http.NewRequest(http.MethodPost, "/accounts/", requestBody)
 	response := httptest.NewRecorder()
 
-	router.ServeHTTP(response, request)
+	s.router.ServeHTTP(response, request)
 
 	s.Equal(http.StatusBadRequest, response.Code)
 }
 
 func (s *AccountTestSuite) TestGetAccount() {
-	router := GetConfiguredRouter()
-
 	createdAccount := newTestAccount()
 	util.GetDatabase().Create(createdAccount)
 
@@ -74,7 +71,7 @@ func (s *AccountTestSuite) TestGetAccount() {
 	request, _ := http.NewRequest(http.MethodGet, requestPath, nil)
 	response := httptest.NewRecorder()
 
-	router.ServeHTTP(response, request)
+	s.router.ServeHTTP(response, request)
 
 	responseData := &model.Account{}
 	json.Unmarshal(response.Body.Bytes(), responseData)
@@ -85,13 +82,11 @@ func (s *AccountTestSuite) TestGetAccount() {
 }
 
 func (s *AccountTestSuite) TestGetNonExistingAccount() {
-	router := GetConfiguredRouter()
-
 	requestPath := fmt.Sprintf("/accounts/%s", uuid.New().String())
 	request, _ := http.NewRequest(http.MethodGet, requestPath, nil)
 	response := httptest.NewRecorder()
 
-	router.ServeHTTP(response, request)
+	s.router.ServeHTTP(response, request)
 
 	s.Equal(http.StatusNotFound, response.Code)
 }
