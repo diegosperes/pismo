@@ -61,9 +61,6 @@ func (s *AccountTestSuite) TestCreateInvalidAccount() {
 
 	router.ServeHTTP(response, request)
 
-	responseData := &model.Account{}
-	json.Unmarshal(response.Body.Bytes(), responseData)
-
 	s.Equal(http.StatusBadRequest, response.Code)
 }
 
@@ -95,9 +92,6 @@ func (s *AccountTestSuite) TestGetNonExistingAccount() {
 	response := httptest.NewRecorder()
 
 	router.ServeHTTP(response, request)
-
-	responseData := &model.Account{}
-	json.Unmarshal(response.Body.Bytes(), responseData)
 
 	s.Equal(http.StatusNotFound, response.Code)
 }

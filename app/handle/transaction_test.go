@@ -67,8 +67,5 @@ func (s *TransactionTestSuite) TestCreateInvalidTransaction() {
 
 	router.ServeHTTP(response, request)
 
-	responseData := &model.Transaction{}
-	json.Unmarshal(response.Body.Bytes(), responseData)
-
 	s.Equal(http.StatusBadRequest, response.Code)
 }
